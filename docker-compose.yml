@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:14-alpine
+    container_name: messenger-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: messenger
+      POSTGRES_PASSWORD: messenger_password
+      POSTGRES_DB: messenger
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - messenger-network
+
+  backend:
+    build: ./backend
+    container_name: messenger-backend
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DATABASE_URL=postgresql://messenger:messenger_password@postgres:5432/messenger?schema=public
+      - JWT_SECRET=${JWT_SECRET:-change-this-secret-key-in-production}
+      - JWT_EXPIRES_IN=7d
+      - CORS_ORIGIN=http://localhost:5173
+    depends_on:
+      - postgres
+    networks:
+      - messenger-network
+    command: sh -c "npx prisma migrate deploy && npm start"
+
+  frontend:
+    build: ./frontend
+    container_name: messenger-frontend
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:3001
+      - VITE_WS_URL=http://localhost:3001
+    depends_on:
+      - backend
+    networks:
+      - messenger-network
+
+volumes:
+  postgres_data:
+
+networks:
+  messenger-network:
+    driver: bridge
+

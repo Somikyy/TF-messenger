@@ -1,0 +1,80 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  username      String    @unique
+  email         String    @unique
+  passwordHash  String    @map("password_hash")
+  displayName   String?   @map("display_name")
+  avatar        String?
+  status        String    @default("offline") // online, offline, away
+  lastSeen      DateTime  @default(now()) @map("last_seen")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  sentMessages     Message[]       @relation("SentMessages")
+  chatParticipants ChatParticipant[]
+
+  @@map("users")
+}
+
+model Chat {
+  id          String    @id @default(uuid())
+  type        String    // "direct" или "group"
+  name        String?   // только для групповых чатов
+  avatar      String?   // только для групповых чатов
+  createdBy   String?   @map("created_by") // ID создателя группы (только для group чатов)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  participants ChatParticipant[]
+  messages     Message[]
+
+  @@map("chats")
+}
+
+model ChatParticipant {
+  id        String   @id @default(uuid())
+  chatId    String   @map("chat_id")
+  userId    String   @map("user_id")
+  joinedAt  DateTime @default(now()) @map("joined_at")
+
+  // Relations
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([chatId, userId])
+  @@map("chat_participants")
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  chatId     String   @map("chat_id")
+  senderId   String   @map("sender_id")
+  content    String   @db.Text
+  type       String   @default("text") // text, image, video, audio, file
+  mediaUrl   String?  @map("media_url") // для будущего функционала
+  isRead     Boolean  @default(false) @map("is_read")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  chat       Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([chatId])
+  @@index([senderId])
+  @@map("messages")
+}
+
