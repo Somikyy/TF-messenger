@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import prisma from '../config/database.js';
 import { generateToken } from '../config/jwt.js';
-import { formatUser } from '../utils/helpers.js';
+import { formatUser, generateUniqueTag } from '../utils/helpers.js';
 import logger from '../utils/logger.js';
 
 const SALT_ROUNDS = 10;
@@ -28,6 +28,9 @@ export const register = async (username, email, password) => {
     // Хешируем пароль
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
 
+    // Генерируем уникальный тег
+    const { tag, tagPrefix, tagSuffix } = await generateUniqueTag(prisma);
+
     // Создаём пользователя
     const user = await prisma.user.create({
       data: {
@@ -36,6 +39,17 @@ export const register = async (username, email, password) => {
         passwordHash,
         displayName: username,
         status: 'offline',
+        tag,
+        tagPrefix,
+        tagSuffix,
+        privacySettings: {
+          whoCanSeeMeOnline: 'all',
+          whoCanMessageMe: 'all',
+          whoCanFindMe: 'all',
+          whoCanAddMeToGroups: 'all',
+          exceptions: [],
+        },
+        language: 'ru',
       },
     });
 

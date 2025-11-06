@@ -18,6 +18,11 @@ model User {
   avatar        String?
   status        String    @default("offline") // online, offline, away
   lastSeen      DateTime  @default(now()) @map("last_seen")
+  tag           String?   @unique // Полный тег: @prefix.suffix (например: @somikyy.1234)
+  tagPrefix     String?   @map("tag_prefix") // Префикс тега (можно менять)
+  tagSuffix     String?   @map("tag_suffix") // Суффикс тега (4 цифры, нельзя менять)
+  privacySettings Json?   @default("{}") @map("privacy_settings") // Настройки приватности
+  language      String    @default("ru") // Язык интерфейса: ru, en
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
 

@@ -40,7 +40,19 @@ export const getUserById = async (req, res, next) => {
 export const updateUser = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const updateData = req.body;
+    const updateData = { ...req.body };
+
+    // Если загружен аватар, добавляем его URL в updateData
+    if (req.file && req.file.url) {
+      updateData.avatar = req.file.url;
+    }
+
+    // Удаляем пустые строки
+    Object.keys(updateData).forEach(key => {
+      if (updateData[key] === '' || updateData[key] === null) {
+        delete updateData[key];
+      }
+    });
 
     const user = await userService.updateUser(userId, updateData);
 

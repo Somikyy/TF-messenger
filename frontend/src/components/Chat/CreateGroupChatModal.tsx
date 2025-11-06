@@ -173,9 +173,11 @@ export const CreateGroupChatModal: React.FC<CreateGroupChatModalProps> = ({
                         <p className="font-medium text-gray-900 truncate">
                           {searchUser.displayName || searchUser.username}
                         </p>
-                        <p className="text-sm text-gray-500 truncate">
-                          {searchUser.email}
-                        </p>
+                        {searchUser.tag && (
+                          <p className="text-sm text-gray-500 truncate">
+                            {searchUser.tag}
+                          </p>
+                        )}
                       </div>
                     </button>
                   ))}

@@ -7,8 +7,22 @@ export interface User {
   avatar?: string;
   status: 'online' | 'offline' | 'away';
   lastSeen: string;
+  tag?: string;
+  tagPrefix?: string;
+  tagSuffix?: string;
+  privacySettings?: PrivacySettings;
+  language?: 'ru' | 'en';
   createdAt: string;
   updatedAt: string;
+}
+
+// Настройки приватности
+export interface PrivacySettings {
+  whoCanSeeMeOnline?: 'all' | 'none' | 'allExcept' | 'noneExcept';
+  whoCanMessageMe?: 'all' | 'none' | 'allExcept' | 'noneExcept';
+  whoCanFindMe?: 'all' | 'none' | 'allExcept' | 'noneExcept';
+  whoCanAddMeToGroups?: 'all' | 'none' | 'allExcept' | 'noneExcept';
+  exceptions?: string[]; // Массив ID пользователей-исключений
 }
 
 // Типы для чата

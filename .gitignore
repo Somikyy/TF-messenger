@@ -31,6 +31,7 @@ lerna-debug.log*
 *.swp
 *.swo
 *~
+.cursor/
 
 # OS
 Thumbs.db
@@ -55,6 +56,44 @@ GITHUB_SETUP.md
 *.sqlite
 *.sqlite3
 
-# Uploaded files
+# Uploaded files - фотографии, аудио и другие загруженные файлы
 backend/uploads/
+backend/uploads/**
+!backend/uploads/.gitkeep
+
+# Временные файлы
+*.tmp
+*.temp
+.cache/
+.temp/
+
+# Файлы сборки и кэша
+.next/
+.nuxt/
+.cache/
+.parcel-cache/
+.turbo/
+.vite/
+
+# Файлы операционной системы
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Desktop.ini
+
+# Файлы редакторов
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
+.vscode/
+.idea/
+*.iml
+
+# Файлы резервных копий
+*.bak
+*.backup
+*~
 

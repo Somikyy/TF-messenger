@@ -1,10 +1,25 @@
 import logger from '../utils/logger.js';
+import multer from 'multer';
 
 /**
  * Middleware для обработки ошибок
  */
 export const errorHandler = (err, req, res, next) => {
   logger.error('Error:', err);
+
+  // Ошибка multer
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({
+        error: 'File too large',
+        message: 'Размер файла превышает допустимый лимит',
+      });
+    }
+    return res.status(400).json({
+      error: 'Upload error',
+      message: err.message || 'Ошибка загрузки файла',
+    });
+  }
 
   // Ошибка валидации Joi
   if (err.isJoi) {
@@ -51,9 +66,21 @@ export const errorHandler = (err, req, res, next) => {
   const statusCode = err.statusCode || err.status || 500;
   const message = err.message || 'Internal server error';
 
+  // Логируем полную ошибку для отладки
+  logger.error('Full error details:', {
+    message: err.message,
+    stack: err.stack,
+    code: err.code,
+    name: err.name,
+  });
+
   res.status(statusCode).json({
     error: message,
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+    message: message,
+    ...(process.env.NODE_ENV === 'development' && { 
+      stack: err.stack,
+      details: err,
+    }),
   });
 };
 

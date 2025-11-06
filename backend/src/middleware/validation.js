@@ -42,9 +42,22 @@ export const loginSchema = Joi.object({
 });
 
 export const updateUserSchema = Joi.object({
-  displayName: Joi.string().min(1).max(100).optional(),
-  avatar: Joi.string().uri().optional(),
-});
+  displayName: Joi.string().min(1).max(100).optional().allow(''),
+  avatar: Joi.string().uri().optional().allow(''),
+  tagPrefix: Joi.string().min(1).max(50).optional().allow(''),
+  language: Joi.string().valid('ru', 'en').optional().allow(''),
+  privacySettings: Joi.alternatives().try(
+    Joi.object({
+      whoCanSeeMeOnline: Joi.string().valid('all', 'none', 'allExcept', 'noneExcept').optional(),
+      whoCanMessageMe: Joi.string().valid('all', 'none', 'allExcept', 'noneExcept').optional(),
+      whoCanFindMe: Joi.string().valid('all', 'none', 'allExcept', 'noneExcept').optional(),
+      whoCanAddMeToGroups: Joi.string().valid('all', 'none', 'allExcept', 'noneExcept').optional(),
+      exceptions: Joi.array().items(Joi.string().uuid()).optional(),
+    }),
+    Joi.string(), // Может быть строка JSON
+    Joi.valid(null)
+  ).optional(),
+}).unknown(true); // Разрешаем неизвестные поля (для FormData), проверка на наличие полей в parseFormData
 
 export const createChatSchema = Joi.object({
   type: Joi.string().valid('direct', 'group').required(),

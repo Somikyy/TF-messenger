@@ -23,8 +23,17 @@ export const userService = {
   /**
    * Обновление профиля пользователя
    */
-  updateUser: async (data: Partial<User>): Promise<User> => {
-    const response = await api.put<{ user: User }>('/users/me', data);
+  updateUser: async (data: Partial<User> | FormData): Promise<User> => {
+    const isFormData = data instanceof FormData;
+    const config = isFormData
+      ? {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      : {};
+
+    const response = await api.put<{ user: User }>('/users/me', data, config);
     return response.data.user;
   },
 };
