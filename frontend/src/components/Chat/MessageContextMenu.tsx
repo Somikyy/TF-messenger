@@ -52,7 +52,11 @@ export const MessageContextMenu: React.FC<MessageContextMenuProps> = ({
   const handleDeleteMessage = async () => {
     if (window.confirm('Вы уверены, что хотите удалить это сообщение?')) {
       try {
+        // Удаляем сообщение через API
+        // WebSocket событие будет отправлено автоматически с бэкенда
         await messageService.deleteMessage(message.id);
+        // Оптимистично удаляем сообщение локально
+        // Если WebSocket событие придет, оно обновит состояние
         removeMessage(message.chatId, message.id);
         onClose();
       } catch (error) {

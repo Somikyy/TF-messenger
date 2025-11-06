@@ -55,6 +55,8 @@ export const createMessage = async (req, res, next) => {
     // Отправляем WebSocket событие всем участникам чата
     const io = req.app.get('io');
     if (io) {
+      // Отправляем всем в комнате чата
+      // Это гарантирует, что все участники, которые присоединились к комнате, получат сообщение
       io.to(`chat:${chatId}`).emit('new_message', {
         message,
       });
@@ -106,6 +108,8 @@ export const deleteMessage = async (req, res, next) => {
     // Отправляем WebSocket событие всем участникам чата
     const io = req.app.get('io');
     if (io && result.chatId) {
+      // Отправляем всем в комнате чата
+      // Это гарантирует, что все участники, которые присоединились к комнате, получат уведомление об удалении
       io.to(`chat:${result.chatId}`).emit('message_deleted', {
         messageId: result.messageId,
         chatId: result.chatId,

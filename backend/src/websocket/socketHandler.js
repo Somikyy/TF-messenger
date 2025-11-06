@@ -69,6 +69,18 @@ export const initializeSocket = (server) => {
     // Отправляем подтверждение аутентификации
     socket.emit('authenticated', { userId });
 
+    // Автоматически присоединяем пользователя ко всем его чатам при подключении
+    chatService.getUserChats(userId)
+      .then(chats => {
+        chats.forEach(chat => {
+          socket.join(`chat:${chat.id}`);
+        });
+        logger.debug(`User ${userId} automatically joined ${chats.length} chats on connection`);
+      })
+      .catch(err => {
+        logger.error('Error joining user chats on connection:', err);
+      });
+
     // Обработка события: присоединиться к чату
     socket.on('join_chat', async ({ chatId }) => {
       try {
@@ -81,6 +93,23 @@ export const initializeSocket = (server) => {
         socket.emit('error', {
           message: error.message,
           code: 'JOIN_CHAT_ERROR',
+        });
+      }
+    });
+
+    // Автоматически присоединяем пользователя ко всем его чатам при подключении
+    socket.on('join_all_chats', async () => {
+      try {
+        const chats = await chatService.getUserChats(userId);
+        chats.forEach(chat => {
+          socket.join(`chat:${chat.id}`);
+        });
+        logger.debug(`User ${userId} joined ${chats.length} chats`);
+      } catch (error) {
+        logger.error('Join all chats error:', error);
+        socket.emit('error', {
+          message: error.message,
+          code: 'JOIN_ALL_CHATS_ERROR',
         });
       }
     });

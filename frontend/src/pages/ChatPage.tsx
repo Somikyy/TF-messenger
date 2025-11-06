@@ -17,7 +17,12 @@ export const ChatPage: React.FC = () => {
       initializeWebSocketListeners();
 
       // Загружаем чаты (это также присоединит нас ко всем чатам)
-      fetchChats();
+      fetchChats().then(() => {
+        // После загрузки чатов присоединяемся ко всем чатам через WebSocket
+        if (websocketService.isConnected()) {
+          websocketService.joinAllChats();
+        }
+      });
     }
   }, [isAuthenticated, fetchChats, initializeWebSocketListeners]);
 
@@ -37,9 +42,8 @@ export const ChatPage: React.FC = () => {
       if (isAuthenticated && chats.length > 0) {
         // Небольшая задержка, чтобы убедиться, что соединение установлено
         setTimeout(() => {
-          chats.forEach((chat) => {
-            websocketService.joinChat(chat.id);
-          });
+          // Присоединяемся ко всем чатам через один запрос
+          websocketService.joinAllChats();
         }, 100);
       }
     };

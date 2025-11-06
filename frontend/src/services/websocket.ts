@@ -83,6 +83,18 @@ class WebSocketService {
   }
 
   /**
+   * Присоединиться ко всем чатам пользователя
+   */
+  joinAllChats(): void {
+    if (this.socket?.connected) {
+      this.socket.emit('join_all_chats');
+      console.log('Joining all chats');
+    } else {
+      console.warn('WebSocket not connected, cannot join all chats');
+    }
+  }
+
+  /**
    * Покинуть чат
    */
   leaveChat(chatId: string): void {

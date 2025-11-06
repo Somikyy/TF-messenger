@@ -247,6 +247,13 @@ export const useChatStore = create<ChatState>((set, get) => ({
   removeMessage: (chatId: string, messageId: string) => {
     set((state) => {
       const existingMessages = state.messages[chatId] || [];
+      const messageExists = existingMessages.some((m) => m.id === messageId);
+      
+      // Если сообщение уже удалено, ничего не делаем
+      if (!messageExists) {
+        return state;
+      }
+      
       return {
         messages: {
           ...state.messages,

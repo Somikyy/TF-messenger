@@ -116,26 +116,8 @@ export const useMessageStore = create<MessageState>(() => ({
         // Добавляем новое сообщение (от другого пользователя или от нас, но не оптимистичное)
         // Важно: всегда добавляем сообщение, даже если оно от нас, но не оптимистичное
         // Это гарантирует синхронизацию между разными браузерами/вкладками
+        // Используем addMessage, который проверяет дубликаты
         chatStore.addMessage(data.message.chatId, data.message);
-        
-        // Дополнительно убеждаемся, что сообщение добавлено в store
-        // Это важно для синхронизации между вкладками
-        useChatStore.setState((state) => {
-          const existingMessages = state.messages[data.message.chatId] || [];
-          const messageExists = existingMessages.some((m) => m.id === data.message.id);
-          
-          if (messageExists) {
-            return state; // Сообщение уже есть, ничего не делаем
-          }
-          
-          // Добавляем сообщение
-          return {
-            messages: {
-              ...state.messages,
-              [data.message.chatId]: [...existingMessages, data.message],
-            },
-          };
-        });
       }
     };
     websocketService.onNewMessage(messageHandler);
