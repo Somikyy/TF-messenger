@@ -55,3 +55,6 @@ GITHUB_SETUP.md
 *.sqlite
 *.sqlite3
 
+# Uploaded files
+backend/uploads/
+

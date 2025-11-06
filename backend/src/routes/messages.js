@@ -1,6 +1,7 @@
 import express from 'express';
 import messageController from '../controllers/messageController.js';
 import { authenticate } from '../middleware/auth.js';
+import { uploadAudio, getAudioUrl } from '../middleware/upload.js';
 import {
   validate,
   createMessageSchema,
@@ -19,9 +20,11 @@ router.get(
   messageController.getMessages
 );
 
-// Создание нового сообщения
+// Создание нового сообщения (с поддержкой загрузки аудио)
 router.post(
   '/chats/:chatId/messages',
+  uploadAudio.single('audio'),
+  getAudioUrl,
   validate(createMessageSchema),
   messageController.createMessage
 );

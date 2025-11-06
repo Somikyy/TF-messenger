@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Avatar } from '../UI/Avatar';
+import { VoicePlayer } from './VoicePlayer';
 import { useAuthStore } from '../../store/authStore';
 import { MessageContextMenu } from './MessageContextMenu';
 import type { Message as MessageType } from '../../types';
@@ -63,7 +64,16 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
                 : 'bg-gray-200 text-gray-900'
             }`}
           >
-            <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+            {message.type === 'audio' && message.mediaUrl ? (
+              <div className="min-w-[200px]">
+                <VoicePlayer
+                  audioUrl={message.mediaUrl}
+                  className={isOwn ? 'text-white' : ''}
+                />
+              </div>
+            ) : (
+              <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+            )}
           </div>
           <span className="text-xs text-gray-400 mt-1">
             {formatTime(message.createdAt)}

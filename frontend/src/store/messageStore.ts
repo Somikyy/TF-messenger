@@ -1,11 +1,13 @@
 import { create } from 'zustand';
 import type { Message } from '../types';
 import websocketService from '../services/websocket';
+import messageService from '../services/messageService';
 import { useChatStore } from './chatStore';
 import { useAuthStore } from './authStore';
 
 interface MessageState {
   sendMessage: (chatId: string, content: string) => void;
+  sendVoiceMessage: (chatId: string, audioBlob: Blob) => Promise<void>;
   initializeWebSocketListeners: () => void;
   cleanupWebSocketListeners: () => void;
 }
@@ -45,6 +47,24 @@ export const useMessageStore = create<MessageState>(() => ({
     
     // Отправляем через WebSocket
     websocketService.sendMessage(chatId, content);
+  },
+
+  sendVoiceMessage: async (chatId: string, audioBlob: Blob) => {
+    const authStore = useAuthStore.getState();
+    
+    if (!authStore.user) return;
+    
+    try {
+      // Убеждаемся, что мы в комнате чата
+      websocketService.joinChat(chatId);
+      
+      // Отправляем голосовое сообщение через API
+      // Backend автоматически отправит сообщение через WebSocket всем участникам
+      await messageService.createVoiceMessage(chatId, audioBlob);
+    } catch (error) {
+      console.error('Ошибка при отправке голосового сообщения:', error);
+      throw error;
+    }
   },
 
   initializeWebSocketListeners: () => {

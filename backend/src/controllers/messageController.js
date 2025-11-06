@@ -29,13 +29,36 @@ export const createMessage = async (req, res, next) => {
     const { content, type, mediaUrl } = req.body;
     const senderId = req.user.id;
 
+    // Если тип audio, проверяем наличие файла или mediaUrl
+    if (type === 'audio') {
+      if (!req.file && !mediaUrl) {
+        return res.status(400).json({
+          error: 'Для голосового сообщения требуется аудио файл или mediaUrl',
+        });
+      }
+    }
+
+    // Если есть загруженный файл (для голосовых сообщений)
+    let finalMediaUrl = mediaUrl || null;
+    if (req.file && req.file.url) {
+      finalMediaUrl = req.file.url;
+    }
+
     const message = await messageService.createMessage(
       chatId,
       senderId,
-      content,
+      content || (type === 'audio' ? 'Голосовое сообщение' : ''),
       type || 'text',
-      mediaUrl || null
+      finalMediaUrl
     );
+
+    // Отправляем WebSocket событие всем участникам чата
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`chat:${chatId}`).emit('new_message', {
+        message,
+      });
+    }
 
     res.status(201).json({ message });
   } catch (error) {

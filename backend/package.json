@@ -12,7 +12,13 @@
     "prisma:migrate:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio"
   },
-  "keywords": ["messenger", "chat", "websocket", "realtime", "open-source"],
+  "keywords": [
+    "messenger",
+    "chat",
+    "websocket",
+    "realtime",
+    "open-source"
+  ],
   "author": "TF-Messenger Contributors",
   "license": "AGPL-3.0",
   "dependencies": {
@@ -23,6 +29,7 @@
     "express": "^4.18.2",
     "joi": "^17.11.0",
     "jsonwebtoken": "^9.0.2",
+    "multer": "^2.0.2",
     "socket.io": "^4.7.2"
   },
   "devDependencies": {

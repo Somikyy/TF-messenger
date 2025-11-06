@@ -57,7 +57,11 @@ export const createChatSchema = Joi.object({
 });
 
 export const createMessageSchema = Joi.object({
-  content: Joi.string().min(1).max(5000).required(),
+  content: Joi.string().min(1).max(5000).when('type', {
+    is: 'audio',
+    then: Joi.optional().allow(''),
+    otherwise: Joi.required(),
+  }),
   type: Joi.string().valid('text', 'image', 'video', 'audio', 'file').optional(),
   mediaUrl: Joi.string().uri().optional(),
 });

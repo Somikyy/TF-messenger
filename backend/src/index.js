@@ -2,6 +2,8 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import { createServer } from 'http';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import logger from './utils/logger.js';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
 import initializeSocket from './websocket/socketHandler.js';
@@ -11,6 +13,9 @@ import authRoutes from './routes/auth.js';
 import userRoutes from './routes/users.js';
 import chatRoutes from './routes/chats.js';
 import messageRoutes from './routes/messages.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -26,6 +31,9 @@ app.use(cors({
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Статическая раздача загруженных файлов
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Health check
 app.get('/health', (req, res) => {

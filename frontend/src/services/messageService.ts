@@ -36,6 +36,41 @@ export const messageService = {
   },
 
   /**
+   * Создание голосового сообщения
+   */
+  createVoiceMessage: async (
+    chatId: string,
+    audioBlob: Blob
+  ): Promise<Message> => {
+    const formData = new FormData();
+    formData.append('audio', audioBlob, 'voice-message.webm');
+    formData.append('type', 'audio');
+    formData.append('content', 'Голосовое сообщение');
+
+    const token = localStorage.getItem('token');
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
+    const response = await fetch(
+      `${API_URL}/api/messages/chats/${chatId}/messages`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Ошибка при отправке голосового сообщения');
+    }
+
+    const data = await response.json();
+    return data.message;
+  },
+
+  /**
    * Пометить сообщения как прочитанные
    */
   markAsRead: async (
