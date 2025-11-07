@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Avatar } from '../UI/Avatar';
 import { VoicePlayer } from './VoicePlayer';
 import { useAuthStore } from '../../store/authStore';
+import { useI18n } from '../../i18n/context';
 import { MessageContextMenu } from './MessageContextMenu';
 import type { Message as MessageType } from '../../types';
 
@@ -11,6 +12,7 @@ interface MessageProps {
 
 export const Message: React.FC<MessageProps> = ({ message }) => {
   const { user } = useAuthStore();
+  const { t, language } = useI18n();
   const isOwn = message.senderId === user?.id;
   const [contextMenu, setContextMenu] = useState<{ position: { x: number; y: number } } | null>(null);
 
@@ -20,11 +22,11 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
     const diff = now.getTime() - date.getTime();
     const minutes = Math.floor(diff / 60000);
 
-    if (minutes < 1) return 'только что';
-    if (minutes < 60) return `${minutes} мин назад`;
-    if (minutes < 1440) return `${Math.floor(minutes / 60)} ч назад`;
+    if (minutes < 1) return t('justNow');
+    if (minutes < 60) return `${minutes} ${t('minutesAgo')}`;
+    if (minutes < 1440) return `${Math.floor(minutes / 60)} ${t('hoursAgo')}`;
 
-    return date.toLocaleDateString('ru-RU', {
+    return date.toLocaleDateString(language === 'ru' ? 'ru-RU' : 'en-US', {
       day: 'numeric',
       month: 'short',
       hour: '2-digit',
@@ -75,11 +77,11 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
               <div className="max-w-md">
                 <img
                   src={message.mediaUrl}
-                  alt={message.content || 'Изображение'}
+                  alt={message.content || t('image')}
                   className="max-w-full h-auto rounded-lg cursor-pointer"
                   onClick={() => window.open(message.mediaUrl, '_blank')}
                 />
-                {message.content && message.content !== 'Изображение' && (
+                {message.content && message.content !== t('image') && (
                   <p className="text-sm mt-2 whitespace-pre-wrap break-words">
                     {message.content}
                   </p>
@@ -93,9 +95,9 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
                   className="max-w-full h-auto rounded-lg"
                   style={{ maxHeight: '400px' }}
                 >
-                  Ваш браузер не поддерживает видео.
+                  {t('browserNotSupportVideo')}
                 </video>
-                {message.content && message.content !== 'Видео' && (
+                {message.content && message.content !== t('video') && (
                   <p className="text-sm mt-2 whitespace-pre-wrap break-words">
                     {message.content}
                   </p>
@@ -122,7 +124,7 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
                   rel="noopener noreferrer"
                   className="text-sm underline hover:opacity-80 break-words"
                 >
-                  {message.content || 'Файл'}
+                  {message.content || t('fileDownload')}
                 </a>
               </div>
             ) : (

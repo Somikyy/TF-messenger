@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '../UI/Button';
+import { useI18n } from '../../i18n/context';
 
 interface VoiceRecorderProps {
   onRecordingComplete: (audioBlob: Blob) => void;
@@ -10,6 +11,7 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
   onRecordingComplete,
   onCancel,
 }) => {
+  const { t } = useI18n();
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
@@ -119,10 +121,10 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
     return (
       <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
         <p className="text-sm text-red-600 mb-2">
-          Нет доступа к микрофону. Пожалуйста, разрешите доступ к микрофону в настройках браузера.
+          {t('noMicrophoneAccess')}
         </p>
         <Button onClick={onCancel} variant="secondary" size="sm">
-          Отмена
+          {t('cancel')}
         </Button>
       </div>
     );
@@ -145,10 +147,10 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
                   clipRule="evenodd"
                 />
               </svg>
-              Начать запись
+              {t('startRecording')}
             </Button>
             <Button onClick={onCancel} variant="secondary" size="sm">
-              Отмена
+              {t('cancel')}
             </Button>
           </>
         ) : (
@@ -156,14 +158,14 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
             <div className="flex items-center gap-2 flex-1">
               <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
               <span className="text-sm font-medium text-gray-700">
-                Запись: {formatTime(recordingTime)}
+                {t('recording')}: {formatTime(recordingTime)}
               </span>
             </div>
             <Button onClick={stopRecording} variant="primary" size="sm">
-              Остановить
+              {t('stopRecording')}
             </Button>
             <Button onClick={cancelRecording} variant="secondary" size="sm">
-              Отмена
+              {t('cancel')}
             </Button>
           </>
         )}

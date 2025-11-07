@@ -1,12 +1,14 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useAuthStore } from '../../store/authStore';
+import { useI18n } from '../../i18n/context';
 import { Button } from '../UI/Button';
 import { Input } from '../UI/Input';
 import type { RegisterFormData } from '../../types';
 
 export const RegisterForm: React.FC = () => {
   const { register: registerUser, isLoading, error, clearError } = useAuthStore();
+  const { t } = useI18n();
   const {
     register,
     handleSubmit,
@@ -44,64 +46,64 @@ export const RegisterForm: React.FC = () => {
       )}
 
       <Input
-        label="Имя пользователя"
+        label={t('username')}
         {...register('username', {
-          required: 'Имя пользователя обязательно',
+          required: t('usernameRequired'),
           minLength: {
             value: 3,
-            message: 'Имя пользователя должно быть не менее 3 символов',
+            message: t('usernameMinLength'),
           },
           maxLength: {
             value: 30,
-            message: 'Имя пользователя должно быть не более 30 символов',
+            message: t('usernameMaxLength'),
           },
           pattern: {
             value: /^[a-zA-Z0-9]+$/,
-            message: 'Имя пользователя может содержать только буквы и цифры',
+            message: t('usernamePattern'),
           },
         })}
         error={errors.username?.message}
       />
 
       <Input
-        label="Email"
+        label={t('email')}
         type="email"
         {...register('email', {
-          required: 'Email обязателен',
+          required: t('emailRequired'),
           pattern: {
             value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-            message: 'Некорректный email',
+            message: t('emailInvalid'),
           },
         })}
         error={errors.email?.message}
       />
 
       <Input
-        label="Пароль"
+        label={t('password')}
         type="password"
         {...register('password', {
-          required: 'Пароль обязателен',
+          required: t('passwordRequired'),
           minLength: {
             value: 6,
-            message: 'Пароль должен быть не менее 6 символов',
+            message: t('passwordMinLength'),
           },
         })}
         error={errors.password?.message}
       />
 
       <Input
-        label="Подтвердите пароль"
+        label={t('confirmPassword')}
         type="password"
         {...register('confirmPassword', {
-          required: 'Подтверждение пароля обязательно',
+          required: t('confirmPasswordRequired'),
           validate: (value) =>
-            value === password || 'Пароли не совпадают',
+            value === password || t('passwordsDoNotMatch'),
         })}
         error={errors.confirmPassword?.message}
       />
 
       <Button type="submit" isLoading={isLoading} className="w-full">
-        Зарегистрироваться
+        {t('register')}
       </Button>
     </form>
   );

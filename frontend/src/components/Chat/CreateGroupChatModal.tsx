@@ -4,6 +4,7 @@ import { Button } from '../UI/Button';
 import { Input } from '../UI/Input';
 import { useChatStore } from '../../store/chatStore';
 import { useAuthStore } from '../../store/authStore';
+import { useI18n } from '../../i18n/context';
 import userService from '../../services/userService';
 import type { User } from '../../types';
 
@@ -18,6 +19,7 @@ export const CreateGroupChatModal: React.FC<CreateGroupChatModalProps> = ({
 }) => {
   const { createChat, isLoading } = useChatStore();
   const { user } = useAuthStore();
+  const { t } = useI18n();
   const [groupName, setGroupName] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<User[]>([]);
@@ -116,7 +118,7 @@ export const CreateGroupChatModal: React.FC<CreateGroupChatModalProps> = ({
       >
         {/* Header */}
         <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Создать групповой чат</h2>
+          <h2 className="text-xl font-semibold">{t('createGroupChatTitle')}</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 text-2xl"
@@ -129,8 +131,8 @@ export const CreateGroupChatModal: React.FC<CreateGroupChatModalProps> = ({
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {/* Название группы */}
           <Input
-            label="Название группы"
-            placeholder="Введите название группы"
+            label={t('groupName')}
+            placeholder={t('enterGroupName')}
             value={groupName}
             onChange={(e) => setGroupName(e.target.value)}
           />
@@ -138,12 +140,12 @@ export const CreateGroupChatModal: React.FC<CreateGroupChatModalProps> = ({
           {/* Поиск пользователей */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Добавить участников
+              {t('addParticipants')}
             </label>
             <div className="relative">
               <input
                 type="text"
-                placeholder="Поиск пользователей..."
+                placeholder={t('searchUsers')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
@@ -188,7 +190,7 @@ export const CreateGroupChatModal: React.FC<CreateGroupChatModalProps> = ({
                 searchResults.length === 0 &&
                 !isSearching && (
                   <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg p-4 text-center text-gray-500">
-                    Пользователи не найдены
+                    {t('usersNotFound')}
                   </div>
                 )}
             </div>
@@ -198,7 +200,7 @@ export const CreateGroupChatModal: React.FC<CreateGroupChatModalProps> = ({
           {selectedUsers.length > 0 && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Участники ({selectedUsers.length})
+                {t('participants')} ({selectedUsers.length})
               </label>
               <div className="flex flex-wrap gap-2">
                 {selectedUsers.map((selectedUser) => (
@@ -235,7 +237,7 @@ export const CreateGroupChatModal: React.FC<CreateGroupChatModalProps> = ({
             className="flex-1"
             disabled={isLoading}
           >
-            Отмена
+            {t('cancel')}
           </Button>
           <Button
             onClick={handleCreate}
@@ -243,7 +245,7 @@ export const CreateGroupChatModal: React.FC<CreateGroupChatModalProps> = ({
             disabled={!groupName.trim() || selectedUsers.length === 0 || isLoading}
             isLoading={isLoading}
           >
-            Создать
+            {t('create')}
           </Button>
         </div>
       </div>

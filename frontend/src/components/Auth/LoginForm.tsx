@@ -1,12 +1,14 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useAuthStore } from '../../store/authStore';
+import { useI18n } from '../../i18n/context';
 import { Button } from '../UI/Button';
 import { Input } from '../UI/Input';
 import type { LoginFormData } from '../../types';
 
 export const LoginForm: React.FC = () => {
   const { login, isLoading, error, clearError } = useAuthStore();
+  const { t } = useI18n();
   const {
     register,
     handleSubmit,
@@ -39,33 +41,33 @@ export const LoginForm: React.FC = () => {
       )}
 
       <Input
-        label="Email"
+        label={t('email')}
         type="email"
         {...register('email', {
-          required: 'Email обязателен',
+          required: t('emailRequired'),
           pattern: {
             value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-            message: 'Некорректный email',
+            message: t('emailInvalid'),
           },
         })}
         error={errors.email?.message}
       />
 
       <Input
-        label="Пароль"
+        label={t('password')}
         type="password"
         {...register('password', {
-          required: 'Пароль обязателен',
+          required: t('passwordRequired'),
           minLength: {
             value: 6,
-            message: 'Пароль должен быть не менее 6 символов',
+            message: t('passwordMinLength'),
           },
         })}
         error={errors.password?.message}
       />
 
       <Button type="submit" isLoading={isLoading} className="w-full">
-        Войти
+        {t('login')}
       </Button>
     </form>
   );

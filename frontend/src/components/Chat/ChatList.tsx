@@ -3,6 +3,7 @@ import { Avatar } from '../UI/Avatar';
 import { Button } from '../UI/Button';
 import { useChatStore } from '../../store/chatStore';
 import { useAuthStore } from '../../store/authStore';
+import { useI18n } from '../../i18n/context';
 import userService from '../../services/userService';
 import { CreateGroupChatModal } from './CreateGroupChatModal';
 import { ChatContextMenu } from './ChatContextMenu';
@@ -11,6 +12,7 @@ import type { Chat, User } from '../../types';
 export const ChatList: React.FC = () => {
   const { chats, currentChat, selectChat, createChat } = useChatStore();
   const { user } = useAuthStore();
+  const { t, language } = useI18n();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<User[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -22,13 +24,13 @@ export const ChatList: React.FC = () => {
 
   const getChatName = (chat: Chat) => {
     if (chat.type === 'group') {
-      return chat.name || 'Групповой чат';
+      return chat.name || t('groupChat');
     }
     // Для direct чата находим другого участника
     const otherParticipant = chat.participants.find(
       (p) => p.userId !== user?.id
     );
-    return otherParticipant?.user?.displayName || otherParticipant?.user?.username || 'Пользователь';
+    return otherParticipant?.user?.displayName || otherParticipant?.user?.username || t('user');
   };
 
   const getChatAvatar = (chat: Chat) => {
@@ -48,7 +50,7 @@ export const ChatList: React.FC = () => {
         ? `${lastMessage.content.substring(0, 50)}...`
         : lastMessage.content;
     }
-    return 'Нет сообщений';
+    return t('noMessages');
   };
 
   const formatTime = (dateString: string) => {
@@ -57,11 +59,11 @@ export const ChatList: React.FC = () => {
     const diff = now.getTime() - date.getTime();
     const minutes = Math.floor(diff / 60000);
 
-    if (minutes < 1) return 'только что';
-    if (minutes < 60) return `${minutes} мин`;
-    if (minutes < 1440) return `${Math.floor(minutes / 60)} ч`;
+    if (minutes < 1) return t('justNow');
+    if (minutes < 60) return `${minutes} ${t('minutesAgo').split(' ')[0]}`;
+    if (minutes < 1440) return `${Math.floor(minutes / 60)} ${t('hoursAgo').split(' ')[0]}`;
 
-    return date.toLocaleDateString('ru-RU', {
+    return date.toLocaleDateString(language === 'ru' ? 'ru-RU' : 'en-US', {
       day: 'numeric',
       month: 'short',
     });
@@ -131,11 +133,11 @@ export const ChatList: React.FC = () => {
       <div className="w-80 border-r border-gray-200 flex flex-col">
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-xl font-semibold">Чаты</h2>
+            <h2 className="text-xl font-semibold">{t('chats')}</h2>
             <Button
               size="sm"
               onClick={() => setShowCreateGroupModal(true)}
-              title="Создать групповой чат"
+              title={t('createGroupChat')}
               className="p-2"
             >
               <svg
@@ -159,7 +161,7 @@ export const ChatList: React.FC = () => {
           <input
             ref={searchInputRef}
             type="text"
-            placeholder="Поиск пользователей..."
+            placeholder={t('searchUsers')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => {
@@ -212,7 +214,7 @@ export const ChatList: React.FC = () => {
                       </p>
                     </div>
                     {existingChat && (
-                      <span className="text-xs text-primary-600">Открыть чат</span>
+                      <span className="text-xs text-primary-600">{t('openChat')}</span>
                     )}
                   </button>
                 );
@@ -222,7 +224,7 @@ export const ChatList: React.FC = () => {
           
           {showSearchResults && searchQuery.trim().length > 0 && searchResults.length === 0 && !isSearching && (
             <div className="absolute z-[10] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg p-4 text-center text-gray-500">
-              Пользователи не найдены
+              {t('usersNotFound')}
             </div>
           )}
         </div>
@@ -232,8 +234,8 @@ export const ChatList: React.FC = () => {
         <div className="flex-1 overflow-y-auto divide-y divide-gray-200">
           {chats.length === 0 ? (
           <div className="p-4 text-center text-gray-500">
-            <p>Нет чатов</p>
-            <p className="text-sm mt-2">Найдите пользователя выше, чтобы начать общение</p>
+            <p>{t('noChats')}</p>
+            <p className="text-sm mt-2">{t('findUserToStart')}</p>
           </div>
         ) : (
                         chats.map((chat) => (
