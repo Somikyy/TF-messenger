@@ -71,6 +71,53 @@ export const messageService = {
   },
 
   /**
+   * Создание сообщения с файлом (фото, видео, файл)
+   */
+  createFileMessage: async (
+    chatId: string,
+    file: File
+  ): Promise<Message> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    // Определяем тип сообщения на основе типа файла
+    const mimeType = file.type;
+    let messageType = 'file';
+    if (mimeType.startsWith('image/')) {
+      messageType = 'image';
+    } else if (mimeType.startsWith('video/')) {
+      messageType = 'video';
+    } else if (mimeType.startsWith('audio/')) {
+      messageType = 'audio';
+    }
+    
+    formData.append('type', messageType);
+    formData.append('content', file.name || '');
+
+    const token = localStorage.getItem('token');
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
+    const response = await fetch(
+      `${API_URL}/api/messages/chats/${chatId}/messages`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Ошибка при отправке файла');
+    }
+
+    const data = await response.json();
+    return data.message;
+  },
+
+  /**
    * Пометить сообщения как прочитанные
    */
   markAsRead: async (

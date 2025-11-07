@@ -71,6 +71,60 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
                   className={isOwn ? 'text-white' : ''}
                 />
               </div>
+            ) : message.type === 'image' && message.mediaUrl ? (
+              <div className="max-w-md">
+                <img
+                  src={message.mediaUrl}
+                  alt={message.content || 'Изображение'}
+                  className="max-w-full h-auto rounded-lg cursor-pointer"
+                  onClick={() => window.open(message.mediaUrl, '_blank')}
+                />
+                {message.content && message.content !== 'Изображение' && (
+                  <p className="text-sm mt-2 whitespace-pre-wrap break-words">
+                    {message.content}
+                  </p>
+                )}
+              </div>
+            ) : message.type === 'video' && message.mediaUrl ? (
+              <div className="max-w-md">
+                <video
+                  src={message.mediaUrl}
+                  controls
+                  className="max-w-full h-auto rounded-lg"
+                  style={{ maxHeight: '400px' }}
+                >
+                  Ваш браузер не поддерживает видео.
+                </video>
+                {message.content && message.content !== 'Видео' && (
+                  <p className="text-sm mt-2 whitespace-pre-wrap break-words">
+                    {message.content}
+                  </p>
+                )}
+              </div>
+            ) : message.type === 'file' && message.mediaUrl ? (
+              <div className="flex items-center gap-2">
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+                <a
+                  href={message.mediaUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm underline hover:opacity-80 break-words"
+                >
+                  {message.content || 'Файл'}
+                </a>
+              </div>
             ) : (
               <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
             )}

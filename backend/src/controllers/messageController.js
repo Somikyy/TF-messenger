@@ -29,26 +29,95 @@ export const createMessage = async (req, res, next) => {
     const { content, type, mediaUrl } = req.body;
     const senderId = req.user.id;
 
-    // Если тип audio, проверяем наличие файла или mediaUrl
-    if (type === 'audio') {
-      if (!req.file && !mediaUrl) {
-        return res.status(400).json({
-          error: 'Для голосового сообщения требуется аудио файл или mediaUrl',
-        });
+    // Определяем тип сообщения на основе загруженного файла, если тип не указан
+    let messageType = type || 'text';
+    let defaultContent = content || '';
+
+    // Если есть загруженный файл, определяем тип сообщения
+    if (req.file && req.file.url) {
+      if (!type) {
+        // Определяем тип на основе MIME типа файла
+        const mimeType = req.file.mimetype;
+        if (mimeType.startsWith('image/')) {
+          messageType = 'image';
+          defaultContent = req.file.originalname || 'Изображение';
+        } else if (mimeType.startsWith('video/')) {
+          messageType = 'video';
+          defaultContent = req.file.originalname || 'Видео';
+        } else if (mimeType.startsWith('audio/')) {
+          messageType = 'audio';
+          defaultContent = 'Голосовое сообщение';
+        } else {
+          messageType = 'file';
+          defaultContent = req.file.originalname || 'Файл';
+        }
       }
     }
 
-    // Если есть загруженный файл (для голосовых сообщений)
+    // Проверяем наличие файла для типов, которые требуют файл
+    if (messageType === 'audio' && !req.file && !mediaUrl) {
+      return res.status(400).json({
+        error: 'Для голосового сообщения требуется аудио файл или mediaUrl',
+      });
+    }
+
+    if (messageType === 'image' && !req.file && !mediaUrl) {
+      return res.status(400).json({
+        error: 'Для изображения требуется файл или mediaUrl',
+      });
+    }
+
+    if (messageType === 'video' && !req.file && !mediaUrl) {
+      return res.status(400).json({
+        error: 'Для видео требуется файл или mediaUrl',
+      });
+    }
+
+    if (messageType === 'file' && !req.file && !mediaUrl) {
+      return res.status(400).json({
+        error: 'Для файла требуется файл или mediaUrl',
+      });
+    }
+
+    // Если есть загруженный файл, проверяем размер и используем его URL
     let finalMediaUrl = mediaUrl || null;
     if (req.file && req.file.url) {
+      // Проверяем размер файла в зависимости от типа
+      const fileSize = req.file.size;
+      const mimeType = req.file.mimetype;
+      
+      if (mimeType.startsWith('image/') && fileSize > 6 * 1024 * 1024) {
+        return res.status(400).json({
+          error: 'Размер изображения не должен превышать 6MB',
+        });
+      }
+      
+      if (mimeType.startsWith('video/') && fileSize > 50 * 1024 * 1024) {
+        return res.status(400).json({
+          error: 'Размер видео не должен превышать 50MB',
+        });
+      }
+      
+      if (mimeType.startsWith('audio/') && fileSize > 10 * 1024 * 1024) {
+        return res.status(400).json({
+          error: 'Размер аудио файла не должен превышать 10MB',
+        });
+      }
+      
+      if (!mimeType.startsWith('image/') && !mimeType.startsWith('video/') && !mimeType.startsWith('audio/') && fileSize > 1024 * 1024 * 1024) {
+        return res.status(400).json({
+          error: 'Размер файла не должен превышать 1GB',
+        });
+      }
+      
       finalMediaUrl = req.file.url;
     }
 
     const message = await messageService.createMessage(
       chatId,
       senderId,
-      content || (type === 'audio' ? 'Голосовое сообщение' : ''),
-      type || 'text',
+      defaultContent || content || '',
+      messageType,
       finalMediaUrl
     );
 

@@ -4,6 +4,7 @@ import { VoiceRecorder } from './VoiceRecorder';
 import { useMessageStore } from '../../store/messageStore';
 import { useChatStore } from '../../store/chatStore';
 import websocketService from '../../services/websocket';
+import messageService from '../../services/messageService';
 
 export const MessageInput: React.FC = () => {
   const { sendMessage, sendVoiceMessage } = useMessageStore();
@@ -12,7 +13,9 @@ export const MessageInput: React.FC = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
   const [isSendingVoice, setIsSendingVoice] = useState(false);
+  const [isUploadingFile, setIsUploadingFile] = useState(false);
   const typingTimeoutRef = useRef<number | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     return () => {
@@ -83,6 +86,30 @@ export const MessageInput: React.FC = () => {
     setShowVoiceRecorder(false);
   };
 
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !currentChat) return;
+
+    setIsUploadingFile(true);
+
+    try {
+      await messageService.createFileMessage(currentChat.id, file);
+      // Очищаем input для возможности повторной загрузки того же файла
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } catch (error) {
+      console.error('Ошибка при отправке файла:', error);
+      alert('Не удалось отправить файл. Попробуйте еще раз.');
+    } finally {
+      setIsUploadingFile(false);
+    }
+  };
+
+  const handleFileButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+
   if (!currentChat) {
     return null;
   }
@@ -106,6 +133,13 @@ export const MessageInput: React.FC = () => {
         />
       ) : (
         <form onSubmit={handleSubmit} className="flex gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            onChange={handleFileSelect}
+            className="hidden"
+            accept="image/*,video/*,audio/*,*/*"
+          />
           <textarea
             value={content}
             onChange={(e) => {
@@ -120,9 +154,30 @@ export const MessageInput: React.FC = () => {
           />
           <Button
             type="button"
+            onClick={handleFileButtonClick}
+            variant="secondary"
+            disabled={isSendingVoice || isUploadingFile}
+            title="Прикрепить файл"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+              />
+            </svg>
+          </Button>
+          <Button
+            type="button"
             onClick={() => setShowVoiceRecorder(true)}
             variant="secondary"
-            disabled={isSendingVoice}
+            disabled={isSendingVoice || isUploadingFile}
             title="Записать голосовое сообщение"
           >
             <svg
@@ -137,8 +192,8 @@ export const MessageInput: React.FC = () => {
               />
             </svg>
           </Button>
-          <Button type="submit" disabled={!content.trim() || isSendingVoice}>
-            {isSendingVoice ? 'Отправка...' : 'Отправить'}
+          <Button type="submit" disabled={!content.trim() || isSendingVoice || isUploadingFile}>
+            {isSendingVoice || isUploadingFile ? 'Отправка...' : 'Отправить'}
           </Button>
         </form>
       )}
